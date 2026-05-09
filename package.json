@@ -1,0 +1,39 @@
+{
+  "name": "api-sentinel",
+  "version": "1.0.0",
+  "description": "CLI tool to test multiple API endpoints and generate detailed reports.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "api-sentinel": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node src/index.js --file endpoints.example.json",
+    "lint": "node --check src/index.js src/testEndpoint.js src/reporters/jsonReporter.js src/reporters/markdownReporter.js src/utils/logger.js"
+  },
+  "keywords": [
+    "api",
+    "cli",
+    "testing",
+    "endpoint",
+    "monitoring",
+    "http",
+    "report",
+    "devops",
+    "health-check"
+  ],
+  "author": "Ezeril",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ezeril/api-sentinel.git"
+  },
+  "homepage": "https://github.com/Ezeril/api-sentinel#readme",
+  "bugs": {
+    "url": "https://github.com/Ezeril/api-sentinel/issues"
+  }
+}

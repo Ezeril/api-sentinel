@@ -1,0 +1,32 @@
+[
+  {
+    "name": "JSONPlaceholder — Posts",
+    "url": "https://jsonplaceholder.typicode.com/posts",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  {
+    "name": "JSONPlaceholder — Single Post",
+    "url": "https://jsonplaceholder.typicode.com/posts/1",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  {
+    "name": "JSONPlaceholder — Not Found",
+    "url": "https://jsonplaceholder.typicode.com/posts/9999",
+    "method": "GET",
+    "expectedStatus": 404
+  },
+  {
+    "name": "GitHub API — Public",
+    "url": "https://api.github.com",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  {
+    "name": "Intentional failure — wrong status",
+    "url": "https://jsonplaceholder.typicode.com/users",
+    "method": "GET",
+    "expectedStatus": 201
+  }
+]
