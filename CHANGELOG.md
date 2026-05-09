@@ -13,7 +13,7 @@ _Nothing yet._
 
 ---
 
-## [1.0.0] — 2026-01-15
+## [1.0.0] — 2026-05-09
 
 ### Added
 - Initial release of `api-sentinel`
