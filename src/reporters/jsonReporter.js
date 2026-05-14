@@ -4,13 +4,14 @@
  */
 
 import { writeFileSync } from "fs";
-import { resolve } from "path";
+import { join } from "path";
 
 /**
- * Generates report.json in the current working directory.
+ * Generates report.json in the specified output directory.
  * @param {import('../testEndpoint.js').EndpointResult[]} results
+ * @param {string} outputDir - Absolute path to the output directory
  */
-export async function generateJsonReport(results) {
+export async function generateJsonReport(results, outputDir = process.cwd()) {
   const total = results.length;
   const passed = results.filter((r) => r.passed).length;
   const failed = total - passed;
@@ -31,6 +32,6 @@ export async function generateJsonReport(results) {
     results,
   };
 
-  const outputPath = resolve(process.cwd(), "report.json");
+  const outputPath = join(outputDir, "report.json");
   writeFileSync(outputPath, JSON.stringify(report, null, 2), "utf-8");
 }
