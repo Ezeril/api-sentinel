@@ -7,22 +7,24 @@ import { log } from "./utils/logger.js";
 
 /**
  * @typedef {Object} EndpointConfig
- * @property {string} name            - Human-readable label
- * @property {string} url             - Full URL to test
- * @property {string} [method]        - HTTP method (default: GET)
- * @property {number} expectedStatus  - Expected HTTP status code
+ * @property {string}  name            - Human-readable label
+ * @property {string}  url             - Full URL to test
+ * @property {string}  [method]        - HTTP method (default: GET)
+ * @property {number}  expectedStatus  - Expected HTTP status code
+ * @property {Object}  [headers]       - Optional request headers
+ * @property {Object|string} [body]    - Optional request body (auto-serialized if object)
  */
 
 /**
  * @typedef {Object} EndpointResult
- * @property {string}  name
- * @property {string}  url
- * @property {string}  method
- * @property {number}  expectedStatus
- * @property {number|null} status       - Actual HTTP status received (null on network error)
- * @property {number}  responseTime     - Response time in milliseconds
- * @property {boolean} passed           - Whether status matches expectedStatus
- * @property {string|null} error        - Error message if request failed
+ * @property {string}      name
+ * @property {string}      url
+ * @property {string}      method
+ * @property {number}      expectedStatus
+ * @property {number|null} status        - Actual HTTP status received (null on network error)
+ * @property {number}      responseTime  - Response time in milliseconds
+ * @property {boolean}     passed        - Whether status matches expectedStatus
+ * @property {string|null} error         - Error message if request failed
  */
 
 /**
@@ -32,7 +34,7 @@ import { log } from "./utils/logger.js";
  * @returns {Promise<EndpointResult>}
  */
 export async function testEndpoint(endpoint, timeoutMs = 10_000) {
-  const { name, url, method = "GET", expectedStatus } = endpoint;
+  const { name, url, method = "GET", expectedStatus, headers = {}, body } = endpoint;
 
   // Validate required fields
   if (!url || !expectedStatus) {
@@ -50,19 +52,29 @@ export async function testEndpoint(endpoint, timeoutMs = 10_000) {
     return buildResult(endpoint, null, 0, false, error);
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  // Build fetch options
+  const fetchOptions = {
+    method: method.toUpperCase(),
+    signal: AbortSignal.timeout(timeoutMs),
+    redirect: "follow",
+    headers: { ...headers },
+  };
+
+  // Attach body if provided (not allowed on GET/HEAD)
+  if (body !== undefined && !["GET", "HEAD"].includes(method.toUpperCase())) {
+    if (typeof body === "object") {
+      fetchOptions.body = JSON.stringify(body);
+      fetchOptions.headers["Content-Type"] =
+        fetchOptions.headers["Content-Type"] ?? "application/json";
+    } else {
+      fetchOptions.body = String(body);
+    }
+  }
+
   const start = Date.now();
 
   try {
-    const response = await fetch(url, {
-      method: method.toUpperCase(),
-      signal: controller.signal,
-      redirect: "follow",
-    });
-
-    clearTimeout(timer);
-
+    const response = await fetch(url, fetchOptions);
     const responseTime = Date.now() - start;
     const status = response.status;
     const passed = status === expectedStatus;
@@ -75,11 +87,10 @@ export async function testEndpoint(endpoint, timeoutMs = 10_000) {
 
     return buildResult(endpoint, status, responseTime, passed, null);
   } catch (err) {
-    clearTimeout(timer);
     const responseTime = Date.now() - start;
 
     let errorMessage;
-    if (err.name === "AbortError") {
+    if (err.name === "TimeoutError" || err.name === "AbortError") {
       errorMessage = `Request timed out after ${timeoutMs}ms`;
     } else if (err.cause?.code === "ENOTFOUND" || err.cause?.code === "ECONNREFUSED") {
       errorMessage = `Network error: ${err.cause.code} — ${url}`;
