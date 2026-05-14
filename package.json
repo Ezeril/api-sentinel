@@ -1,6 +1,6 @@
 {
   "name": "api-sentinel",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI tool to test multiple API endpoints and generate detailed reports.",
   "type": "module",
   "main": "src/index.js",
